@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export default function ChatBox() {
+export default function ChatBox({ addSystemMessage }) {
   const [messages, setMessages] = useState([
     { text: "こんにちは！塗り絵を楽しんでいますか？", sender: "ai" },
   ]);
@@ -22,6 +22,23 @@ export default function ChatBox() {
     setMessages((prev) => [...prev, { text: data.reply, sender: "ai" }]);
   };
 
+  // システムメッセージを追加する関数
+  const addMessage = (text) => {
+    setMessages((prev) => [...prev, { text, sender: "ai" }]);
+  };
+
+  // propsで受け取った関数に、ローカルの関数を紐付ける
+  if (addSystemMessage) {
+    addSystemMessage(addMessage);
+  }
+
+  const handleComplete = () => {
+    setMessages((prev) => [...prev, { 
+      text: "お絵描きを終了します。楽しんでいただけましたか？", 
+      sender: "ai" 
+    }]);
+  };
+
   return (
     <section className="chat-section">
       <h2>もぴっく君</h2>
@@ -34,8 +51,38 @@ export default function ChatBox() {
       </div>
       <div className="chat-input-area">
         <input type="text" id="userInput" placeholder="メッセージを入力..." />
-        <button onClick={sendMessage}>送信</button>
+        <div className="button-group">
+          <button 
+            onClick={sendMessage}
+            className="send-button"
+          >
+            送信
+          </button>
+        </div>
       </div>
+      <style jsx>{`
+        .chat-input-area {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+        .button-group {
+          display: flex;
+          gap: 10px;
+        }
+        .send-button {
+          background-color: #2563eb;
+          color: white;
+          padding: 8px 16px;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          transition: background-color 0.2s;
+        }
+        .send-button:hover {
+          background-color: #1d4ed8;
+        }
+      `}</style>
     </section>
   );
 }

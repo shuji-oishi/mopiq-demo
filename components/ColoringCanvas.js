@@ -1,12 +1,20 @@
 import { useRef, useEffect, useState } from "react";
 import { animalDrawings } from "../data/animalDrawings";
 
-export default function ColoringCanvas({ color, size }) {
+export default function ColoringCanvas({ color, size, addSystemMessage }) {
   const canvasRef = useRef(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [lastX, setLastX] = useState(0);
   const [lastY, setLastY] = useState(0);
   const [currentAnimal, setCurrentAnimal] = useState(null);
+  const [sendMessage, setSendMessage] = useState(null);
+
+  // メッセージ送信関数を保存
+  useEffect(() => {
+    if (addSystemMessage) {
+      addSystemMessage((message) => setSendMessage(() => message));
+    }
+  }, [addSystemMessage]);
 
   // 動物の線画を描画する関数
   const drawAnimal = (ctx, animal) => {
@@ -101,31 +109,79 @@ export default function ColoringCanvas({ color, size }) {
     if (currentAnimal) {
       drawAnimal(ctx, currentAnimal);
     }
+
+    // メッセージを送信
+    if (sendMessage) {
+      sendMessage("色や動物を変えて試してみよう！");
+    }
   };
 
   return (
-    <div className="canvas-wrapper">
+    <div className="canvas-container">
       <canvas
         ref={canvasRef}
-        width="500"
-        height="400"
-        style={{ border: "1px solid #000" }}
+        width={400}
+        height={400}
         onMouseDown={startDrawing}
         onMouseMove={draw}
         onMouseUp={stopDrawing}
         onMouseOut={stopDrawing}
       />
-      <div className="canvas-controls">
-        <p className="animal-name">{currentAnimal ? `${currentAnimal.name}に色を塗ろう！` : ''}</p>
-        <div className="canvas-buttons">
-          <button onClick={clearCanvas} className="clear-button">
-            クリア
-          </button>
-          <button onClick={newAnimal} className="new-animal-button">
-            別の動物に変える
-          </button>
-        </div>
+      <div className="button-container">
+        <button onClick={clearCanvas} className="control-button">クリア</button>
+        <button onClick={newAnimal} className="control-button">次の動物</button>
+        <button onClick={() => {
+          const canvas = canvasRef.current;
+          // キャンバスの内容をデータURLとして取得
+          const dataUrl = canvas.toDataURL('image/png');
+          // メッセージを送信
+          if (sendMessage) {
+            sendMessage("お疲れさまでした！");
+          }
+        }} className="complete-button">完了</button>
       </div>
+      <style jsx>{`
+        .canvas-container {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 20px;
+          padding: 20px;
+        }
+        canvas {
+          border: 2px solid #ccc;
+          border-radius: 8px;
+          background-color: white;
+        }
+        .button-container {
+          display: flex;
+          gap: 10px;
+        }
+        .control-button {
+          background-color: #4b5563;
+          color: white;
+          padding: 8px 16px;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          transition: background-color 0.2s;
+        }
+        .control-button:hover {
+          background-color: #374151;
+        }
+        .complete-button {
+          background-color: #22c55e;
+          color: white;
+          padding: 8px 16px;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          transition: background-color 0.2s;
+        }
+        .complete-button:hover {
+          background-color: #16a34a;
+        }
+      `}</style>
     </div>
   );
 }
