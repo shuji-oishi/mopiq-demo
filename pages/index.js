@@ -1,16 +1,11 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import ColoringCanvas from "../components/ColoringCanvas";
 import ChatBox from "../components/ChatBox";
 
 export default function Home() {
   const [color, setColor] = useState("#000000");
   const [size, setSize] = useState(10);
-  const [addMessage, setAddMessage] = useState(null);
-
-  // ChatBoxのメッセージ追加関数を保存する
-  const handleAddSystemMessage = useCallback((fn) => {
-    setAddMessage(() => fn);
-  }, []);
+  const [systemMessage, setSystemMessage] = useState("");
 
   return (
     <div className="app-container">
@@ -29,10 +24,10 @@ export default function Home() {
           <ColoringCanvas 
             color={color} 
             size={size} 
-            addSystemMessage={handleAddSystemMessage} 
+            onSystemMessage={setSystemMessage} 
           />
         </section>
-        <ChatBox addSystemMessage={handleAddSystemMessage} />
+        <ChatBox systemMessage={systemMessage} />
       </main>
     </div>
   );

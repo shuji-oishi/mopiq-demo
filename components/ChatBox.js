@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export default function ChatBox({ addSystemMessage }) {
+export default function ChatBox({ systemMessage }) {
   const [messages, setMessages] = useState([
     { text: "こんにちは！塗り絵を楽しんでいますか？", sender: "ai" },
   ]);
@@ -22,22 +22,10 @@ export default function ChatBox({ addSystemMessage }) {
     setMessages((prev) => [...prev, { text: data.reply, sender: "ai" }]);
   };
 
-  // システムメッセージを追加する関数
-  const addMessage = (text) => {
-    setMessages((prev) => [...prev, { text, sender: "ai" }]);
-  };
-
-  // propsで受け取った関数に、ローカルの関数を紐付ける
-  if (addSystemMessage) {
-    addSystemMessage(addMessage);
+  // システムメッセージが変更されたら表示
+  if (systemMessage && messages[messages.length - 1]?.text !== systemMessage) {
+    setMessages((prev) => [...prev, { text: systemMessage, sender: "ai" }]);
   }
-
-  const handleComplete = () => {
-    setMessages((prev) => [...prev, { 
-      text: "お絵描きを終了します。楽しんでいただけましたか？", 
-      sender: "ai" 
-    }]);
-  };
 
   return (
     <section className="chat-section">

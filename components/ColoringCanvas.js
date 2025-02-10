@@ -1,20 +1,12 @@
 import { useRef, useEffect, useState } from "react";
 import { animalDrawings } from "../data/animalDrawings";
 
-export default function ColoringCanvas({ color, size, addSystemMessage }) {
+export default function ColoringCanvas({ color, size, onSystemMessage }) {
   const canvasRef = useRef(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [lastX, setLastX] = useState(0);
   const [lastY, setLastY] = useState(0);
   const [currentAnimal, setCurrentAnimal] = useState(null);
-  const [sendMessage, setSendMessage] = useState(null);
-
-  // メッセージ送信関数を保存
-  useEffect(() => {
-    if (addSystemMessage) {
-      addSystemMessage((message) => setSendMessage(() => message));
-    }
-  }, [addSystemMessage]);
 
   // 動物の線画を描画する関数
   const drawAnimal = (ctx, animal) => {
@@ -81,22 +73,6 @@ export default function ColoringCanvas({ color, size, addSystemMessage }) {
     setIsDrawing(false);
   };
 
-  const newAnimal = () => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-
-    // キャンバスをクリア
-    ctx.fillStyle = "white";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // 新しいランダムな動物を選択
-    const randomAnimal = animalDrawings[Math.floor(Math.random() * animalDrawings.length)];
-    setCurrentAnimal(randomAnimal);
-
-    // 動物の線画を描画
-    drawAnimal(ctx, randomAnimal);
-  };
-
   const clearCanvas = () => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
@@ -111,9 +87,25 @@ export default function ColoringCanvas({ color, size, addSystemMessage }) {
     }
 
     // メッセージを送信
-    if (sendMessage) {
-      sendMessage("色や動物を変えて試してみよう！");
+    if (onSystemMessage) {
+      onSystemMessage("色や動物を変えて試してみよう！");
     }
+  };
+
+  const newAnimal = () => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+
+    // キャンバスをクリア
+    ctx.fillStyle = "white";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // 新しいランダムな動物を選択
+    const randomAnimal = animalDrawings[Math.floor(Math.random() * animalDrawings.length)];
+    setCurrentAnimal(randomAnimal);
+
+    // 動物の線画を描画
+    drawAnimal(ctx, randomAnimal);
   };
 
   return (
@@ -131,12 +123,8 @@ export default function ColoringCanvas({ color, size, addSystemMessage }) {
         <button onClick={clearCanvas} className="control-button">クリア</button>
         <button onClick={newAnimal} className="control-button">次の動物</button>
         <button onClick={() => {
-          const canvas = canvasRef.current;
-          // キャンバスの内容をデータURLとして取得
-          const dataUrl = canvas.toDataURL('image/png');
-          // メッセージを送信
-          if (sendMessage) {
-            sendMessage("お疲れさまでした！");
+          if (onSystemMessage) {
+            onSystemMessage("お疲れさまでした！");
           }
         }} className="complete-button">完了</button>
       </div>
