@@ -18,7 +18,7 @@ export default function Home() {
 
       <div className={styles.contentWrapper}>
         <div className={styles.canvasArea}>
-          <h2 className={styles.sectionTitle}>塗り絵エリア</h2>
+          <h2 className={styles.sectionTitle}>コンテンツエリア</h2>
           <div className={styles.controls}>
             <div className={styles.tools}>
               <input

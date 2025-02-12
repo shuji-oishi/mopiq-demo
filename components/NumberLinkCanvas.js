@@ -7,7 +7,7 @@ export default function NumberLinkCanvas({ color, size, onSystemMessage }) {
   const [currentPuzzle, setCurrentPuzzle] = useState(null);
   const [paths, setPaths] = useState({}); // 各キャラクターの経路を保存
   const [currentCharacter, setCurrentCharacter] = useState(null);
-  const [gridSize, setGridSize] = useState(50); // グリッドのセルサイズを大きくする
+  const [gridSize, setGridSize] = useState(50); // グリッドのセルサイズ
 
   // パズルの初期化
   useEffect(() => {
@@ -33,6 +33,7 @@ export default function NumberLinkCanvas({ color, size, onSystemMessage }) {
     if (currentPuzzle) {
       drawGrid();
       drawCharacters();
+      drawPaths();
     }
   };
 
@@ -83,6 +84,29 @@ export default function NumberLinkCanvas({ color, size, onSystemMessage }) {
     });
   };
 
+  // パスの描画
+  const drawPaths = () => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+
+    Object.entries(paths).forEach(([char, path]) => {
+      ctx.beginPath();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = size;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      
+      path.forEach((point, index) => {
+        if (index === 0) {
+          ctx.moveTo(point[0], point[1]);
+        } else {
+          ctx.lineTo(point[0], point[1]);
+        }
+      });
+      ctx.stroke();
+    });
+  };
+
   // マウスの位置からグリッドの座標を取得
   const getGridPosition = (x, y) => {
     const gridX = Math.floor(x / gridSize);
@@ -118,7 +142,7 @@ export default function NumberLinkCanvas({ color, size, onSystemMessage }) {
       // 新しい経路を開始
       setPaths(prev => ({
         ...prev,
-        [character]: [[pos[0] * gridSize + gridSize / 2, pos[1] * gridSize + gridSize / 2]]
+        [character]: [[x, y]]
       }));
     }
   };
@@ -139,29 +163,7 @@ export default function NumberLinkCanvas({ color, size, onSystemMessage }) {
       return { ...prev, [currentCharacter]: currentPath };
     });
     
-    // 経路を描画
-    const ctx = canvas.getContext("2d");
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawGrid();
-    drawCharacters();
-    
-    // すべての経路を描画
-    Object.entries(paths).forEach(([char, path]) => {
-      ctx.beginPath();
-      ctx.strokeStyle = color;
-      ctx.lineWidth = size;
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
-      
-      path.forEach((point, index) => {
-        if (index === 0) {
-          ctx.moveTo(point[0], point[1]);
-        } else {
-          ctx.lineTo(point[0], point[1]);
-        }
-      });
-      ctx.stroke();
-    });
+    clearCanvas();
   };
 
   // 描画終了
@@ -194,11 +196,21 @@ export default function NumberLinkCanvas({ color, size, onSystemMessage }) {
     setCurrentCharacter(null);
   };
 
+  // やり直し
+  const resetPaths = () => {
+    setPaths({});
+    setCurrentCharacter(null);
+    setIsDrawing(false);
+    clearCanvas();
+  };
+
   // 新しいパズル
   const newPuzzle = () => {
     const randomPuzzle = characterPuzzles[Math.floor(Math.random() * characterPuzzles.length)];
     setCurrentPuzzle(randomPuzzle);
     setPaths({});
+    setCurrentCharacter(null);
+    setIsDrawing(false);
     clearCanvas();
     
     if (onSystemMessage) {
@@ -220,7 +232,7 @@ export default function NumberLinkCanvas({ color, size, onSystemMessage }) {
       />
       <div>
         <button onClick={newPuzzle}>あたらしいパズル</button>
-        <button onClick={clearCanvas}>やりなおす</button>
+        <button onClick={resetPaths}>やりなおす</button>
       </div>
     </div>
   );
